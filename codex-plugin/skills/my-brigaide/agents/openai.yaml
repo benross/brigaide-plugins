@@ -1,0 +1,9 @@
+# Only where a thread has a folder (the ChatGPT desktop app and Codex). Chats on chatgpt.com and
+# the phone are left alone: people use those for personal things too, and Brigaide's own
+# instructions already say what to do there.
+interface:
+  display_name: "My Brigaide"
+  short_description: "Right agent for each folder"
+policy:
+  products:
+    - CODEX

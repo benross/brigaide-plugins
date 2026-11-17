@@ -1,0 +1,36 @@
+{
+  "name": "brigaide-desktop",
+  "version": "0.2.0",
+  "description": "Add-on for Brigaide. Every new thread in the ChatGPT desktop app or Codex starts as the agent your team set for the folder you're in.",
+  "author": {
+    "name": "Brigaide",
+    "url": "https://brigaide.ai/"
+  },
+  "homepage": "https://brigaide.ai/",
+  "license": "Proprietary",
+  "keywords": [
+    "brigaide",
+    "agents",
+    "team",
+    "roles"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Brigaide Desktop",
+    "shortDescription": "Right agent for each folder",
+    "longDescription": "Add-on for Brigaide. Every new thread in the ChatGPT desktop app or Codex starts as the agent your team set for the folder you’re in. Add Brigaide on chatgpt.com first: https://app.brigaide.ai/install/chatgpt",
+    "developerName": "Brigaide",
+    "category": "Productivity",
+    "capabilities": [],
+    "websiteURL": "https://brigaide.ai/",
+    "defaultPrompt": [
+      "Who are you working as?",
+      "Work as my Designer",
+      "No agent"
+    ],
+    "brandColor": "#111111",
+    "composerIcon": "./assets/brigaide.png",
+    "logo": "./assets/brigaide.png",
+    "screenshots": []
+  }
+}

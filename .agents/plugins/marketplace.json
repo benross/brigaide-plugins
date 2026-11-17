@@ -1,0 +1,20 @@
+{
+  "name": "brigaide",
+  "interface": {
+    "displayName": "Brigaide"
+  },
+  "plugins": [
+    {
+      "name": "brigaide-desktop",
+      "source": {
+        "source": "local",
+        "path": "./codex-plugin"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
