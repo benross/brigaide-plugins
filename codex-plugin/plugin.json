@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "brigaide-desktop",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Add-on for Brigaide. Every new thread in the ChatGPT desktop app or Codex starts as the agent your team set for the folder you're in.",
   "author": {
     "name": "Brigaide",
@@ -18,8 +18,8 @@
   "extensions": {
     "com.openai": {
       "interface": {
-        "displayName": "Brigaide Desktop",
-        "shortDescription": "Right agent for each folder",
+        "displayName": "Folders for Brigaide",
+        "shortDescription": "For the desktop app and Codex",
         "longDescription": "Add-on for Brigaide. Every new thread in the ChatGPT desktop app or Codex starts as the agent your team set for the folder you’re in. Add Brigaide on chatgpt.com first: https://app.brigaide.ai/install/chatgpt",
         "developerName": "Brigaide",
         "category": "Productivity",

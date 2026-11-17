@@ -1,0 +1,6 @@
+{
+  "Brigaide": {
+    "type": "http",
+    "url": "https://app.brigaide.ai/mcp"
+  }
+}

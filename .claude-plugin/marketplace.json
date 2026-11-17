@@ -1,0 +1,12 @@
+{
+  "name": "brigaide",
+  "description": "Your team's agents, kept by the people who know best.",
+  "owner": { "name": "Ben" },
+  "plugins": [
+    {
+      "name": "brigaide",
+      "source": "./plugin",
+      "description": "Your team's agents in Claude Code: a band to switch and star agents, and corrections each agent's boss approves."
+    }
+  ]
+}
