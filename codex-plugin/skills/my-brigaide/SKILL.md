@@ -5,7 +5,7 @@ description: Who you work as in this thread, from the person's Brigaide. Use at 
 
 # My Brigaide
 
-The person's team keeps its agents on Brigaide: each has instructions, house rules and lessons the
+The person's organization keeps its agents on Brigaide: each has instructions, house rules and lessons the
 team has taught it. They reach you through the Brigaide app's tools.
 
 ## At the start of a thread
