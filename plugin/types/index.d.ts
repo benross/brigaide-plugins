@@ -41,7 +41,7 @@ export type Team = {
   org_slug: string
   you: string
   /** The project this folder is linked to, if any. */
-  project: { slug: string; name: string; default_agent: string | null; shows_everywhere: boolean; linked_by: string } | null
+  project: { slug: string; name: string; default_agent: string | null; shows_everywhere: boolean; linked_by: string; change_folder?: 'mine' | 'everyone' } | null
   /** This person's own choice of who new conversations here start with (null: the project's default). Older servers leave it out. */
   my_default?: string | null
   /** Every Brigaide (projects): for the bar always (to link a folder, or use another in one chat); for others only when the folder isn’t linked. */

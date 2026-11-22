@@ -25,12 +25,12 @@ Then, in Claude Code, type `/mcp`, choose **Brigaide** and sign in.
 
 For Claude on the web or in the desktop app's chats, follow <https://app.brigaide.ai/install/claude>.
 
-## Folders for Brigaide, for the ChatGPT desktop app and Codex
+## Brigaide for Codex
 
 Every new thread starts as the agent your team set for the folder you're in.
 
 1. Add Brigaide to ChatGPT first: <https://app.brigaide.ai/install/chatgpt>
-2. Then add Folders for Brigaide. The same page has a Download button and the four short steps. Nothing
+2. Then add Brigaide for Codex. The same page has a Download button and the four short steps. Nothing
    to run and no settings to edit.
 
 ### For a company

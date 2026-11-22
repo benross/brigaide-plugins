@@ -41,11 +41,17 @@ const LINK_PROMPT = 'This folder has no Brigaide yet'
 const LINK_PICK = '__linkpick'
 const LINK = '__link:'
 const KEEP = '__keep'
+// Change (or take off) the Brigaide of a linked folder: the menu's row, and the list's last choice.
+const CHANGE_FOLDER = '__changefolder'
+const UNLINK = '__unlink'
 // What the Brigaide list in the agent menu is for: this chat only, or the folder for good.
-let pickFor: 'chat' | 'folder' = 'chat'
+let pickFor: 'chat' | 'folder' | 'change' = 'chat'
 const NEW_BRIGAIDE = '__new'
 const DEFAULT = '__default'
 const SEPARATOR = '__separator'
+const DIVIDER = '__divider'
+// Every list of agents to pick from is A–Z by name (docs/integrations.md), the same as the server's byName.
+const byName = <T extends { title: string }>(list: readonly T[]): T[] => [...list].sort((a, b) => a.title.localeCompare(b.title, 'en', { sensitivity: 'base' }))
 const DASHBOARD = '__dashboard'
 const ADD_AGENT = '__add'
 const HELP = '__help'
@@ -913,8 +919,30 @@ async function linkThisFolder($: EngineInterface, value: string): Promise<boolea
     $.ui.toast(said)
     return true
   } catch (err) {
-    $.ui.toast(`Couldn’t link it: ${plainError(err).slice(0, 120)}`)
+    // Changing a linked folder: the server's refusal already says why and who can (FOLDER_WORDS).
+    if (pickFor === 'change') {
+      await update($, pickingAtom, () => false)
+      $.ui.toast(plainError(err).slice(0, 200), { timeoutMs: 10000 })
+    } else $.ui.toast(`Couldn’t link it: ${plainError(err).slice(0, 120)}`)
     return false
+  }
+}
+
+// "Global agents only" from "Change this folder’s Brigaide…": the folder's Brigaide comes off, and
+// the bar stops offering to link it again (the menu keeps "Choose a Brigaide for this folder…").
+async function unlinkThisFolder($: EngineInterface) {
+  const root = (await read($, rootAtom)) ?? (await $.session.root())
+  try {
+    const said = await callTool($, 'folder_link', { project: 'none', folder: await describeFolder($, root) })
+    const next = [...new Set([...(await storeGet<string[]>($, 'unlinkedHidden', [])), root])].slice(-200)
+    await storeSet($, 'unlinkedHidden', next)
+    await update($, unlinkedHiddenAtom, () => next)
+    await update($, pickingAtom, () => false)
+    await refresh($, 'unlinked')
+    $.ui.toast(said)
+  } catch (err) {
+    await update($, pickingAtom, () => false)
+    $.ui.toast(plainError(err).slice(0, 200), { timeoutMs: 10000 })
   }
 }
 
@@ -1196,6 +1224,12 @@ When the person asks to work as, talk to or switch to another agent by name (“
 
 When another agent changed or confirmed something for this reply, end the reply with one line saying what each did, at most three: \`Weighed in: Marketing lead tightened the SEO plan; Designer flagged the narrow layout.\` No line when nobody weighed in or they found nothing.${missing.length && t.add_url ? ` If the work clearly needs a role this Brigaide doesn't have (${missing.map(m => m.title).join(', ')}), say so once: an admin can add it at ${t.add_url}.` : ''}`
 }
+
+// A team as the bar draws it, to tell whether a fresh answer changes anything on screen: the
+// server's order and use counts move whenever any chat uses an agent, but the menu is A–Z, the quick
+// switches keep this chat's order, and the counts are never drawn.
+let rankedIds: string[] = []
+const shown = (t: Team) => JSON.stringify({ ...t, agents: [...t.agents].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)).map(({ uses: _uses, ...a }) => a) })
 
 // Ask the engine to draw the band again. Writing an atom redraws whatever read it while drawing,
 // but a band that drew nothing (handing the row back to the engine) isn't redrawn that way in
@@ -1788,10 +1822,16 @@ async function refreshOnce($: EngineInterface, why: string) {
     await adoptServerDefault($, t)
     knownAway.clear() // the fresh team says where each agent runs
     serverIsLocal = (t as { environment?: string }).environment === 'local'
-    await update($, teamAtom, () => t)
-    await update($, statusAtom, () => 'connected' as Status)
+    // The same answer as last time (most of the 20-second checks): draw nothing new. A redraw rebuilds
+    // the agent menu, and the app closes it under the person while they're reading it.
+    rankedIds = t.agents.map(a => a.id) // the server's latest order, for a new chat's quick switches
+    const same = before && (await read($, statusAtom)) === 'connected' && shown(before) === shown(t)
+    if (!same) {
+      await update($, teamAtom, () => t)
+      await update($, statusAtom, () => 'connected' as Status)
+      redraw($)
+    }
     signInNeeded = false
-    redraw($)
     void flushFeedback($)
     buildWaiting($, t)
     note(`team ${t.project?.name ?? 'Everywhere'}: ${t.agents.length} agents, ${t.handoffs?.length ?? 0} hand-off rules (${why})`)
@@ -2849,7 +2889,9 @@ ${body}${skillsSection(s.markdown) ? `\n\n${skillsSection(s.markdown)}` : ''}${r
       const heardText = heardLine(heard, id, narrow)
       // Agents that work in another app come last in the menu, marked with the app, and are never quick switches.
       const away = t.agents.filter(a => elsewhere(a))
-      for (const a of t.agents) if (!quickOrder.includes(a.id)) quickOrder.push(a.id)
+      // A new chat's quick switches start from the server's latest order (kept even when a refresh
+      // that changed nothing on screen didn't replace the team), then stay put for the chat.
+      for (const id of [...rankedIds.filter(x => t.agents.some(a => a.id === x)), ...t.agents.map(a => a.id)]) if (!quickOrder.includes(id)) quickOrder.push(id)
       const others = t.agents.filter(a => a.id !== current?.id && !elsewhere(a)).sort((a, b) => quickOrder.indexOf(a.id) - quickOrder.indexOf(b.id))
       const label = (a: TeamAgent) => `${a.title}${t.project && a.scope === 'everywhere' ? ' · Global' : ''}`
       const place = t.project?.name ?? ''
@@ -2871,21 +2913,27 @@ ${body}${skillsSection(s.markdown) ? `\n\n${skillsSection(s.markdown)}` : ''}${r
       const backLabel = using ? `Back to ${home ? brigaideName(home.slug, home.name) : 'this folder’s Brigaide'}` : null
       note(`drew: ${using ? `[this chat: ${using}] ` : ''}${t.project?.name ?? 'Everywhere'} · ${current?.title ?? (mainAgent ? `${mainAgent.title} (folder agent)` : 'Claude')} · ${t.agents.length} agents${heardText ? ` · ${heardText}` : ''}${st === 'connected' ? '' : ` (${st}, cached)`}`)
 
-      // One control for the agent: its name is the menu. The team first, then what you can do: new
-      // chats with this agent, build an agent you asked for, add one, help, feedback. No heading or
-      // divider rows (the menu takes options only, and a row that does nothing reads as broken): the
-      // agents are names and the actions are verbs, with "No agent" and the agents that run in
-      // another app ending the list of agents. The bar itself names the Brigaide beside the menu.
+      // One control for the agent: its name is the menu. The agents first, then one plain divider,
+      // then what you can do: Dashboard, new chats with this agent, build an agent you asked for, add
+      // one, help, feedback. No heading rows among the agents: a trait goes after the name, with
+      // "No agent" and the agents that run in another app ending the list of agents. The bar itself
+      // names the Brigaide beside the menu.
       const requests = t.agent_requests ?? []
       const menu = [
-        ...t.agents.filter(a => !elsewhere(a)).map(a => ({ value: a.id, label: label(a) })),
+        // A–Z by name, so an agent is always where you look for it; the quick
+        // switches beside the menu keep the person's order.
+        ...byName(t.agents.filter(a => !elsewhere(a))).map(a => ({ value: a.id, label: label(a) })),
         { value: OFF, label: mainAgent?.title ?? 'No agent' },
         // Agents that work in another app come last, each marked with the app (as the quick switches write it), never under a heading.
-        ...away.map(a => ({ value: a.id, label: `${a.title} (${appOf(a)})` })),
+        ...byName(away).map(a => ({ value: a.id, label: `${a.title} (${appOf(a)})` })),
+        // One plain line between the agents and the actions. Picking it does nothing.
+        { value: DIVIDER, label: '──────────' },
         { value: DASHBOARD, label: 'Brigaide Dashboard' },
         ...(backLabel ? [{ value: BACK, label: backLabel }] : []),
         ...(using && t.project && home && !home.name && t.projects.some(p => p.slug === t.project!.slug) ? [{ value: KEEP, label: `Keep ${t.project.name}’s Brigaide for this folder` }] : []),
         ...(unlinkedHome && t.projects.length ? [{ value: LINK_PICK, label: 'Choose a Brigaide for this folder…' }] : []),
+        // A linked folder: change its Brigaide, or take it off. Only offered where the change works.
+        ...(t.project && !using && t.project.change_folder ? [{ value: CHANGE_FOLDER, label: 'Change this folder’s Brigaide…' }] : []),
         ...(brigaides.length ? [{ value: USE_OTHER, label: 'Use another Brigaide for this chat…' }] : []),
         ...(current && !(using && !t.project)
           ? [{ value: DEFAULT, label: isMine ? `Stop using ${current.title} as my default` : `Set ${current.title} as my default agent` }]
@@ -2901,15 +2949,20 @@ ${body}${skillsSection(s.markdown) ? `\n\n${skillsSection(s.markdown)}` : ''}${r
       const nowName = t.project ? `${t.project.name}’s Brigaide` : using ? EVERYWHERE_LABEL : 'This folder'
       const pickMenu = [
         { value: SEPARATOR, label: `${nowName} (now)` },
-        ...(picking && pickFor === 'folder' ? t.projects.map(p => ({ value: `${LINK}${p.slug}`, label: `${p.name}’s Brigaide` })) : brigaides.map(b => ({ value: `${USE}${b.slug}`, label: brigaideName(b.slug, b.name) }))),
+        ...(picking && pickFor === 'folder'
+          ? t.projects.map(p => ({ value: `${LINK}${p.slug}`, label: `${p.name}’s Brigaide` }))
+          : picking && pickFor === 'change'
+            ? [...t.projects.filter(p => p.slug !== t.project?.slug).map(p => ({ value: `${LINK}${p.slug}`, label: `${p.name}’s Brigaide` })), { value: UNLINK, label: EVERYWHERE_LABEL }]
+            : brigaides.map(b => ({ value: `${USE}${b.slug}`, label: brigaideName(b.slug, b.name) }))),
         { value: CANCEL, label: 'Cancel' },
       ]
       const pick = (value: string) => {
-        if (value.startsWith(SEPARATOR)) return redraw($)
+        if (value.startsWith(SEPARATOR) || value === DIVIDER) return redraw($)
         if (value.startsWith(LINK)) return void update($, pickingAtom, () => false).then(() => linkThisFolder($, value.slice(LINK.length)))
         if (value === KEEP && t.project) return void keepForFolder($, t.project.slug)
-        if (value === USE_OTHER || value === LINK_PICK) {
-          pickFor = value === LINK_PICK ? 'folder' : 'chat'
+        if (value === UNLINK) return void unlinkThisFolder($)
+        if (value === USE_OTHER || value === LINK_PICK || value === CHANGE_FOLDER) {
+          pickFor = value === LINK_PICK ? 'folder' : value === CHANGE_FOLDER ? 'change' : 'chat'
           void update($, pickingAtom, () => true).then(() => redraw($))
           // Left open and forgotten: back to the usual menu after a minute.
           $.clock.after(60_000, () => void update($, pickingAtom, () => false).then(() => redraw($)))
@@ -2937,7 +2990,7 @@ ${body}${skillsSection(s.markdown) ? `\n\n${skillsSection(s.markdown)}` : ''}${r
         void switchTo($, value === OFF ? null : value)
       }
       // Where there's no menu (the mobile app), they are buttons too, last, with the app in their name.
-      const quick = Select ? (narrow ? [] : others.slice(0, QUICK)) : [...others, ...away]
+      const quick = Select ? (narrow ? [] : others.slice(0, QUICK)) : [...byName(others), ...byName(away)]
 
       // A team from this machine's saved copy, because the connector can't be reached: say so quietly.
       const offline = st === 'error' || st === 'not-connected'
@@ -3161,7 +3214,7 @@ ${body}${skillsSection(s.markdown) ? `\n\n${skillsSection(s.markdown)}` : ''}${r
           {placeLabel ? <Text key="place" dimColor>{`${placeLabel} ·`}</Text> : null}
           {Select ? (
             picking ? (
-              <Select key="agent-menu" label={pickFor === 'folder' ? 'For this folder' : 'Just for this chat'} options={pickMenu} value={SEPARATOR} onSelect={pick} autoFocus />
+              <Select key="agent-menu" label={pickFor === 'chat' ? 'Just for this chat' : pickFor === 'change' && t.project?.change_folder === 'everyone' ? 'For this folder (everyone)' : 'For this folder'} options={pickMenu} value={SEPARATOR} onSelect={pick} autoFocus />
             ) : (
               <Select key="agent-menu" label="Talking to" options={menu} value={current?.id ?? OFF} onSelect={pick} />
             )
