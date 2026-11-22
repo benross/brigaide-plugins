@@ -93,7 +93,10 @@ const pickingAtom = atom({ plugin: 'brigaide', key: 'picking' } as const, false 
 type Home = { slug: string; name: string | null }
 const slugOf = (t: Team | null | undefined) => t?.project?.slug ?? EVERYWHERE
 const EVERYWHERE_LABEL = 'Global agents only'
-const brigaideName = (slug: string, name: string | null | undefined) => (slug === EVERYWHERE || !name ? EVERYWHERE_LABEL : `${name}’s Brigaide`)
+const brigaideName = (slug: string, name: string | null | undefined, organization?: string) => (slug === EVERYWHERE || !name ? EVERYWHERE_LABEL : `${name}’s Brigaide${organization ? ` · ${organization}` : ''}`)
+// For someone in several organizations, a Brigaide in a list says which one it's in: its own when
+// it's in another, else the one this team is from (docs/organizations.md).
+const orgOf = (t: Team, p: { organization?: string }) => p.organization ?? (t.organization_shown ? t.organization : undefined)
 
 // ---- Agents that work in another app (docs/runs-in.md) -----------------------------------------
 // A Boss can set an agent to run in one AI app. One that runs in ChatGPT is still listed here, but
@@ -259,7 +262,7 @@ async function chooseServer($: EngineInterface) {
   SERVER = next
   serverIsLocal = onLocal()
 }
-const VERSION = '0.15.0'
+const VERSION = '0.16.0'
 
 type ToolName = 'team_list' | 'agent_get' | 'agent_star' | 'agent_default' | 'usage_record' | 'correction_suggest' | 'folder_link' | 'lesson_record' | 'lesson_undo' | 'lesson_reach' | 'feedback_send'
 // The bar's own: building an agent someone asked for on the website, in the background.
@@ -597,7 +600,8 @@ async function callTool($: EngineInterface, name: ToolName, args: Record<string,
 // Each agent on the team is registered as a sub-agent type, brigaide:<id>, so any agent (or
 // plain Claude) can bring another agent in with the Agent tool. Names allow letters, digits, _ and
 // -, so "acme.ux" becomes "acme_ux".
-const subName = (id: string) => id.replace(/\./g, '_')
+// An agent in another organization carries it in its id ("acme/portal.ceo").
+const subName = (id: string) => id.replace(/[./]/g, '_')
 const subType = (id: string) => `brigaide:${subName(id)}`
 const registered = new Map<string, string>() // instance id → etag registered
 
@@ -2842,7 +2846,7 @@ ${body}${skillsSection(s.markdown) ? `\n\n${skillsSection(s.markdown)}` : ''}${r
             value=""
             options={[
               { value: '', label: 'Choose' },
-              ...t.projects.filter(p => p.slug !== match?.slug).map(p => ({ value: p.slug, label: `${p.name}’s Brigaide` })),
+              ...t.projects.filter(p => p.slug !== match?.slug).map(p => ({ value: p.slug, label: brigaideName(p.slug, p.name, orgOf(t, p)) })),
               ...(t.create_url ? [{ value: NEW_BRIGAIDE, label: 'Create a new Brigaide' }] : []),
               { value: HIDE, label: 'Don’t ask in this folder' },
             ]}
@@ -2904,12 +2908,15 @@ ${body}${skillsSection(s.markdown) ? `\n\n${skillsSection(s.markdown)}` : ''}${r
       // name ("Brigaide ·" read as the product's own name).
       const talkingLen = 'Talking to'.length + 1 + (current?.title ?? mainAgent?.title ?? 'No agent').length + 4
       const labelFor = (name: string | null) => (name && using ? (narrow ? `${name}, this chat` : `Using ${name} in this chat`) : name)
-      const fullPlace = t.project ? `${t.project.name}’s Brigaide` : using ? (narrow ? 'Global' : EVERYWHERE_LABEL) : null
+      // Someone in several organizations sees which one first ("Acme · Portal’s Brigaide"); it is
+      // never what gets cut when the bar is narrow.
+      const inOrg = t.organization_shown ? `${t.organization} · ` : ''
+      const fullPlace = t.project ? `${inOrg}${t.project.name}’s Brigaide` : using ? `${inOrg}${narrow ? 'Global' : EVERYWHERE_LABEL}` : null
       const fits = (name: string | null) => (labelFor(name)?.length ?? 0) + 2 + talkingLen <= (e.props.bodyColumns ?? 120) - 4
-      const placeName = t.project && narrow && !fits(fullPlace) ? `${t.project.name}’s` : fullPlace
+      const placeName = t.project && narrow && !fits(fullPlace) ? `${inOrg}${t.project.name}’s` : fullPlace
       const placeLabel = labelFor(placeName)
       const unlinkedHome = !t.project && !using
-      const brigaides = [...t.projects.map(p => ({ slug: p.slug, name: p.name as string | null })), { slug: EVERYWHERE, name: null }].filter(b => b.slug !== shownSlug && b.slug !== home?.slug)
+      const brigaides = [...t.projects.map(p => ({ slug: p.slug, name: p.name as string | null, organization: orgOf(t, p) })), { slug: EVERYWHERE, name: null, organization: undefined as string | undefined }].filter(b => b.slug !== shownSlug && b.slug !== home?.slug)
       const backLabel = using ? `Back to ${home ? brigaideName(home.slug, home.name) : 'this folder’s Brigaide'}` : null
       note(`drew: ${using ? `[this chat: ${using}] ` : ''}${t.project?.name ?? 'Everywhere'} · ${current?.title ?? (mainAgent ? `${mainAgent.title} (folder agent)` : 'Claude')} · ${t.agents.length} agents${heardText ? ` · ${heardText}` : ''}${st === 'connected' ? '' : ` (${st}, cached)`}`)
 
@@ -2950,10 +2957,10 @@ ${body}${skillsSection(s.markdown) ? `\n\n${skillsSection(s.markdown)}` : ''}${r
       const pickMenu = [
         { value: SEPARATOR, label: `${nowName} (now)` },
         ...(picking && pickFor === 'folder'
-          ? t.projects.map(p => ({ value: `${LINK}${p.slug}`, label: `${p.name}’s Brigaide` }))
+          ? t.projects.map(p => ({ value: `${LINK}${p.slug}`, label: brigaideName(p.slug, p.name, orgOf(t, p)) }))
           : picking && pickFor === 'change'
-            ? [...t.projects.filter(p => p.slug !== t.project?.slug).map(p => ({ value: `${LINK}${p.slug}`, label: `${p.name}’s Brigaide` })), { value: UNLINK, label: EVERYWHERE_LABEL }]
-            : brigaides.map(b => ({ value: `${USE}${b.slug}`, label: brigaideName(b.slug, b.name) }))),
+            ? [...t.projects.filter(p => p.slug !== t.project?.slug).map(p => ({ value: `${LINK}${p.slug}`, label: brigaideName(p.slug, p.name, orgOf(t, p)) })), { value: UNLINK, label: EVERYWHERE_LABEL }]
+            : brigaides.map(b => ({ value: `${USE}${b.slug}`, label: brigaideName(b.slug, b.name, b.organization) }))),
         { value: CANCEL, label: 'Cancel' },
       ]
       const pick = (value: string) => {
@@ -3032,7 +3039,7 @@ ${body}${skillsSection(s.markdown) ? `\n\n${skillsSection(s.markdown)}` : ''}${r
                   value=""
                   options={[
                     { value: '', label: 'Choose' },
-                    ...t.projects.filter(p => p.slug !== match?.slug).map(p => ({ value: p.slug, label: `${p.name}’s Brigaide` })),
+                    ...t.projects.filter(p => p.slug !== match?.slug).map(p => ({ value: p.slug, label: brigaideName(p.slug, p.name, orgOf(t, p)) })),
                     ...(t.create_url ? [{ value: NEW_BRIGAIDE, label: 'Create a new Brigaide' }] : []),
                     { value: HIDE, label: 'Don’t ask in this folder' },
                   ]}

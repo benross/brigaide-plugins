@@ -45,7 +45,10 @@ export type Team = {
   /** This person's own choice of who new conversations here start with (null: the project's default). Older servers leave it out. */
   my_default?: string | null
   /** Every Brigaide (projects): for the bar always (to link a folder, or use another in one chat); for others only when the folder isn’t linked. */
-  projects: { slug: string; name: string }[]
+  /** For someone in several organizations, the Brigaides of the others follow, each with its organization's name and a slug that carries it ("acme/portal"). */
+  projects: { slug: string; name: string; organization?: string }[]
+  /** This person is in several organizations, so the bar names the one this folder's Brigaide is in. */
+  organization_shown?: boolean
   agents: TeamAgent[]
   handoffs?: Handoff[]
   /** This person chose lighter hand-offs: a faster model for most teammates, and small changes checked without starting one. Off unless they turned it on. */
