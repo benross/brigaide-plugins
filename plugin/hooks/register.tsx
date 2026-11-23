@@ -347,7 +347,8 @@ function describe(n: unknown): string {
   if (tag === 'Button') return `[${String(p.label ?? kids)}]`
   if (tag === 'Select') {
     const opts = (p.options as { value: string; label: string }[] | undefined) ?? []
-    return `[${String(p.label ?? '')}: ${opts.find(x => x.value === p.value)?.label ?? ''} ▾]`
+    const shown = opts.find(x => x.value === p.value)?.label ?? ''
+    return p.label ? `[${String(p.label)}: ${shown} ▾]` : `[${shown} ▾]`
   }
   if (tag === 'Input') return `[field: ${String(p.placeholder ?? '')}]`
   if (tag === 'Box' && p.flexDirection === 'column') {
@@ -1032,13 +1033,6 @@ async function narrowLearned($: EngineInterface) {
     $.ui.toast(`Couldn’t change it: ${plainError(err).slice(0, 120)}`)
   }
 }
-const learnedDetail = (l: Learned) =>
-  l.saved
-    ? `${l.saved}.`
-    : l.narrow
-    ? `Learned for ${l.learnedFor}: “${l.rule}”${l.note ? ` ${l.note}` : ''}`
-    : l.outcome === 'rule' ? `${l.agentTitle} learned, for everyone: “${l.rule}”` : `${l.agentTitle} learned “${l.rule}” for you. A Boss decides for everyone.`
-
 // "UX lead, Code reviewer +2 weighed in", or "3 weighed in" where the band is narrow. Never the
 // agent you're talking to.
 function heardLine(heard: Heard[], currentId: string | null, narrow: boolean): string | null {
@@ -2688,9 +2682,9 @@ ${body}${skillsSection(s.markdown) ? `\n\n${skillsSection(s.markdown)}` : ''}${r
               : r.narrow && r.learned_for && r.outcome !== 'repeat'
               ? `Lesson saved for ${r.learned_for}: ${r.rule}`
               : r.outcome === 'rule'
-              ? `Lesson saved for ${r.agent_title}, for everyone: ${r.rule}`
+              ? `Lesson saved for ${r.agent_title}: ${r.rule}`
               : r.outcome === 'personal'
-                ? `Lesson saved for ${r.agent_title}, for you (a Boss decides for everyone): ${r.rule}`
+                ? `Lesson saved for ${r.agent_title}, just for you (a Boss can add it to ${r.agent_title}’s lessons): ${r.rule}`
                 : `${r.agent_title} already had this rule: ${r.rule}`
         }
       }
@@ -3077,7 +3071,7 @@ ${body}${skillsSection(s.markdown) ? `\n\n${skillsSection(s.markdown)}` : ''}${r
           draw: () => ({
             len: cost(['Not connected'], ['Reconnect']),
             kids: [
-              quiet('offline', 'Not connected', () => $.ui.toast('Brigaide can’t reach the server right now, so these are the agents it last saw. Press Reconnect, or type /mcp and reconnect “Brigaide”.', { timeoutMs: 10000 })),
+              say('offline', 'Not connected'),
               act('reconnect', 'Reconnect', () => void reconnect($)),
             ],
           }),
@@ -3108,18 +3102,20 @@ ${body}${skillsSection(s.markdown) ? `\n\n${skillsSection(s.markdown)}` : ''}${r
         notices.push({
           key: 'learned',
           waits: false,
-          // The same order in every integration: who it's for, keep it to one agent, Undo, OK.
+          // The same order in every notice and integration: the state, the one real button (keep it
+          // to one agent), then the quiet words (Undo, OK).
           draw: tier => {
             const text = learned.saved ? (tier === 'narrow' ? '✓ Skill saved' : `✓ ${learned.saved}`) : tier === 'narrow' ? (wide ? '✓ Learned for every agent' : '✓ Learned') : `✓ Learned for ${learned.learnedFor ?? learned.agentTitle}`
             const narrowTo = wide && tier !== 'narrow' ? learned.narrow! : null
             return {
-              len: cost(wide ? [text, 'OK'] : [text], narrowTo ? [narrowTo, 'Undo'] : ['Undo']),
+              len: cost(wide ? [text, 'Undo', 'OK'] : [text, 'Undo'], narrowTo ? [narrowTo] : []),
               kids: [
-                <Button key="learned" label={text} plain onPress={() => $.ui.toast(learnedDetail(learned), { timeoutMs: 10000 })}>
-                  <Text color={c.ok}>{text}</Text>
-                </Button>,
+                // The state is words, not a button: a desktop draws every Button with its own
+                // padding, which pushed this row right of the others. The reply says what was learned.
+                <Text key="learned" color={c.ok}>{text}</Text>,
                 narrowTo ? act('narrow-lesson', narrowTo, () => narrowLearned($)) : null,
-                act('undo-lesson', 'Undo', () => undoLearned($)),
+                // Undo takes it back, so it's quiet beside the one real button, like Dismiss.
+                quiet('undo-lesson', 'Undo', () => undoLearned($)),
                 wide ? quiet('ok-lesson', 'OK', () => void update($, learnedAtom, () => null).then(() => redraw($))) : null,
               ].filter(Boolean),
             }
@@ -3219,15 +3215,16 @@ ${body}${skillsSection(s.markdown) ? `\n\n${skillsSection(s.markdown)}` : ''}${r
       const line1 = (
         <Box key="line1" flexDirection="row" flexWrap="wrap" alignItems="center" columnGap={1} rowGap={0}>
           {placeLabel ? <Text key="place" dimColor>{`${placeLabel} ·`}</Text> : null}
+          {/* Our own words, not the menu's label: a desktop sets a menu's label apart with a wide
+              gap, so "·  Talking to" read as a stray dot. Now one gap everywhere. */}
+          {!(Select && picking) ? <Text key="talking" dimColor>Talking to</Text> : null}
           {Select ? (
             picking ? (
               <Select key="agent-menu" label={pickFor === 'chat' ? 'Just for this chat' : pickFor === 'change' && t.project?.change_folder === 'everyone' ? 'For this folder (everyone)' : 'For this folder'} options={pickMenu} value={SEPARATOR} onSelect={pick} autoFocus />
             ) : (
-              <Select key="agent-menu" label="Talking to" options={menu} value={current?.id ?? OFF} onSelect={pick} />
+              <Select key="agent-menu" options={menu} value={current?.id ?? OFF} onSelect={pick} />
             )
-          ) : (
-            <Text key="talking" dimColor>Talking to</Text>
-          )}
+          ) : null}
           {Select ? null : (
             <Text key="current" weight="semibold" color={c.blue}>
               {current?.title ?? mainAgent?.title ?? 'Claude'}
