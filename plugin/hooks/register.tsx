@@ -262,15 +262,16 @@ async function chooseServer($: EngineInterface) {
   SERVER = next
   serverIsLocal = onLocal()
 }
-const VERSION = '0.16.6'
+const VERSION = '0.16.7'
 
 // Claude's account copy of the plugin (Settings → Plugins → Add marketplace) doesn't update by itself
 // unless the person turned on "Sync automatically". When the server says a newer one is published, the
-// bar offers it once a session, whenever the slot is free: Update opens Claude's Plugins page and the
+// bar offers it once a session, whenever the slot is free. The server says "newer" only when this copy
+// is too old to work with it (PLUGIN_NEEDED in server/src/plugin-version.ts), not on every release: Update opens Claude's Plugins page and the
 // notice turns into the steps there, until OK or Later puts it away.
 const PLUGINS_PAGE = 'https://claude.ai/plugins/yours'
-const UPDATE_HOW = 'Press Add, then Manage marketplaces. Press ⋯ beside brigaide-plugins, then Check for updates.'
-const UPDATE_THEN = 'Start a new session to use it.'
+const UPDATE_HOW = 'Press Add at the top right, then Manage marketplaces. Press ⋯ beside brigaide-plugins, then Check for updates.'
+const UPDATE_THEN = 'A new session gets it within an hour.'
 const UPDATE_STEPS = `${UPDATE_HOW} ${UPDATE_THEN}`
 let updateShown: 'offer' | 'steps' | 'done' = 'offer'
 const olderThan = (a: string, b: string) => {

@@ -1,7 +1,7 @@
 {
   "name": "brigaide",
   "displayName": "Brigaide",
-  "version": "0.16.6",
+  "version": "0.16.7",
   "description": "Your Brigaide agents in Claude Code: see who you’re working with, switch, and teach them as you go.",
   "author": {
     "name": "Ben"
