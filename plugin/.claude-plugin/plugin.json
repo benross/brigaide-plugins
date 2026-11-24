@@ -1,8 +1,8 @@
 {
   "name": "brigaide",
   "displayName": "Brigaide",
-  "version": "0.16.4",
-  "description": "Your team's agents in Claude Code: switch and star them from a band above the prompt, and teach them lessons everyone gets.",
+  "version": "0.16.5",
+  "description": "Your Brigaide agents in Claude Code: see who you’re working with, switch, and teach them as you go.",
   "author": {
     "name": "Ben"
   },

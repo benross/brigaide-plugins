@@ -262,7 +262,7 @@ async function chooseServer($: EngineInterface) {
   SERVER = next
   serverIsLocal = onLocal()
 }
-const VERSION = '0.16.4'
+const VERSION = '0.16.5'
 
 // Claude's account copy of the plugin (Settings → Plugins → Add marketplace) doesn't update by itself
 // unless the person turned on "Sync automatically". When the server says a newer one is published, the

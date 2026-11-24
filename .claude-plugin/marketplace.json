@@ -1,6 +1,6 @@
 {
   "name": "brigaide",
-  "description": "Your Brigaide agents, in the AI you already use.",
+  "description": "Brigaide for Claude Code: your agents, in every session.",
   "owner": {
     "name": "Ben"
   },
@@ -8,7 +8,7 @@
     {
       "name": "brigaide",
       "source": "./plugin",
-      "description": "Work with your Brigaide agents in Claude, and switch between them from a bar above the message box."
+      "description": "Your Brigaide agents in Claude Code: see who you’re working with, switch, and teach them as you go."
     }
   ]
 }
