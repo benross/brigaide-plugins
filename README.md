@@ -11,32 +11,27 @@ A bar above the prompt shows which agent you're talking to and switches to anoth
 
 You need a Brigaide account. If you don't have one, [create your Brigaide](https://app.brigaide.ai/signup) first.
 
-Open Claude Code: the **Code** tab in the Claude app on your computer, or Claude Code in a terminal
-or code editor. Type this in the message box and press Enter:
+In the Claude app on your computer:
+
+1. Open **Settings**, then **Plugins** (on the web: <https://claude.ai/plugins>).
+2. Press **Add**, then **Add marketplace**, then **Add from a repository**. Type
+   `benross/brigaide-plugins`, choose **Use "benross/brigaide-plugins"** and press **Sync**.
+3. Press **Brigaide**, then **Add**.
+4. Open the **Code** tab and start a new session. In the Brigaide bar above the message box, press
+   **Connect** and sign in.
+
+<details>
+<summary>Optional: use Claude Code in a terminal instead</summary>
+
+Type these into Claude Code's prompt, one at a time. After the second, choose **Install for you**.
 
 ```
 /plugin marketplace add benross/brigaide-plugins
 ```
 
-Then type this and press Enter. On the screen that opens, choose **Install for you**:
-
 ```
 /plugin install brigaide@brigaide
 ```
-
-Start a new session. In the Brigaide bar above the message box, press **Connect** and sign in.
-
-<details>
-<summary>Optional: install from a terminal instead</summary>
-
-If you already use the `claude` command in a terminal, these do the same:
-
-```bash
-claude plugin marketplace add benross/brigaide-plugins
-claude plugin install brigaide@brigaide --scope user
-```
-
-If your terminal says "command not found", type the lines above into Claude Code instead.
 
 </details>
 
