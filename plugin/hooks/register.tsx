@@ -262,14 +262,16 @@ async function chooseServer($: EngineInterface) {
   SERVER = next
   serverIsLocal = onLocal()
 }
-const VERSION = '0.16.3'
+const VERSION = '0.16.4'
 
 // Claude's account copy of the plugin (Settings → Plugins → Add marketplace) doesn't update by itself
 // unless the person turned on "Sync automatically". When the server says a newer one is published, the
 // bar offers it once a session, whenever the slot is free: Update opens Claude's Plugins page and the
 // notice turns into the steps there, until OK or Later puts it away.
 const PLUGINS_PAGE = 'https://claude.ai/plugins/yours'
-const UPDATE_STEPS = 'Press Add, then Manage marketplaces. Press ⋯ beside brigaide-plugins, then Check for updates. Start a new session to use it.'
+const UPDATE_HOW = 'Press Add, then Manage marketplaces. Press ⋯ beside brigaide-plugins, then Check for updates.'
+const UPDATE_THEN = 'Start a new session to use it.'
+const UPDATE_STEPS = `${UPDATE_HOW} ${UPDATE_THEN}`
 let updateShown: 'offer' | 'steps' | 'done' = 'offer'
 const olderThan = (a: string, b: string) => {
   const x = a.split('.').map(Number)
@@ -3168,7 +3170,20 @@ ${body}${skillsSection(s.markdown) ? `\n\n${skillsSection(s.markdown)}` : ''}${r
           key: 'update',
           waits: true,
           draw: tier => {
-            if (steps) return { len: cost([UPDATE_STEPS, 'OK'], []), kids: [say('update-steps', UPDATE_STEPS), quiet('update-ok', 'OK', later)] }
+            // Two rows, so the steps never break mid-phrase with OK stranded at the end of the first.
+            if (steps)
+              return {
+                len: room + 1,
+                kids: [
+                  <Box key="update-steps" flexDirection="column">
+                    <Text dimColor>{UPDATE_HOW}</Text>
+                    <Box flexDirection="row" columnGap={1}>
+                      {say('update-then', UPDATE_THEN)}
+                      {quiet('update-ok', 'OK', later)}
+                    </Box>
+                  </Box>,
+                ],
+              }
             const text = tier === 'narrow' ? 'Update ready' : 'A newer Brigaide is ready'
             return {
               len: cost([text, 'Later'], ['Update']),
