@@ -16,9 +16,13 @@ In the Claude app on your computer:
 1. Open **Settings**, then **Plugins** (on the web: <https://claude.ai/plugins>).
 2. Press **Add**, then **Add marketplace**, then **Add from a repository**. Type
    `benross/brigaide-plugins`, choose **Use "benross/brigaide-plugins"** and press **Sync**.
-3. Press **Brigaide**, then **Add**.
-4. Open the **Code** tab and start a new session. In the Brigaide bar above the message box, press
-   **Connect** and sign in.
+3. Press **Brigaide**, then **Add**, then **Continue**.
+4. Under **Finish setting up Brigaide**, press **Add…**, **Continue** and **Add**, then **Connect**, and
+   **Connect** again on the Brigaide page. Your agents are now in your Claude chats too.
+5. Open the **Code** tab and start a new session. The Brigaide bar above the message box names your
+   agent; if it shows **Connect**, press it and sign in.
+
+One install covers Claude's chats, the Code tab and Claude Code in a terminal on the same account.
 
 <details>
 <summary>Optional: use Claude Code in a terminal instead</summary>
