@@ -20,7 +20,8 @@ In the Claude app on your computer:
 4. Under **Finish setting up Brigaide**, press **Add…**, **Continue** and **Add**, then **Connect**, and
    **Connect** again on the Brigaide page. Your agents are now in your Claude chats too.
 5. Open the **Code** tab and start a new session. The Brigaide bar above the message box names your
-   agent; if it shows **Connect**, press it and sign in.
+   agent; if it shows **Connect**, press it and sign in. No bar? Start one more new session: one opened
+   in the first minute after adding Brigaide can start without it.
 
 One install covers Claude's chats, the Code tab and Claude Code in a terminal on the same account.
 

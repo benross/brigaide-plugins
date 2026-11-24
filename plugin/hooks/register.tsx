@@ -262,7 +262,22 @@ async function chooseServer($: EngineInterface) {
   SERVER = next
   serverIsLocal = onLocal()
 }
-const VERSION = '0.16.2'
+const VERSION = '0.16.3'
+
+// Claude's account copy of the plugin (Settings → Plugins → Add marketplace) doesn't update by itself
+// unless the person turned on "Sync automatically". When the server says a newer one is published, the
+// bar offers it once a session, whenever the slot is free: Update opens Claude's Plugins page and the
+// notice turns into the steps there, until OK or Later puts it away.
+const PLUGINS_PAGE = 'https://claude.ai/plugins/yours'
+const UPDATE_STEPS = 'Press Add, then Manage marketplaces. Press ⋯ beside brigaide-plugins, then Check for updates. Start a new session to use it.'
+let updateShown: 'offer' | 'steps' | 'done' = 'offer'
+const olderThan = (a: string, b: string) => {
+  const x = a.split('.').map(Number)
+  const y = b.split('.').map(Number)
+  for (let i = 0; i < 3; i++) if ((x[i] ?? 0) !== (y[i] ?? 0)) return (x[i] ?? 0) < (y[i] ?? 0)
+  return false
+}
+const updateReady = (t: Team | null | undefined) => !!t?.plugin_version && /^\d+\.\d+\.\d+$/.test(t.plugin_version) && olderThan(VERSION, t.plugin_version)
 
 type ToolName = 'team_list' | 'agent_get' | 'agent_star' | 'agent_default' | 'usage_record' | 'correction_suggest' | 'folder_link' | 'lesson_record' | 'lesson_undo' | 'lesson_reach' | 'feedback_send'
 // The bar's own: building an agent someone asked for on the website, in the background.
@@ -1778,7 +1793,7 @@ async function refreshOnce($: EngineInterface, why: string) {
     const cached = place ? (cache[placeCacheKey(place)]?.team ?? null) : own
     await update($, teamAtom, () => cached)
     redraw($)
-    note(`folder ${root} (${why})${cached ? `: cached team ${cached.project?.name ?? 'Everywhere'}` : ''}`)
+    note(`folder ${root} (${why})${cached ? `: cached team ${cached.project?.name ?? 'Global agents'}` : ''}`)
     await refreshSkill($)
   }
   // Another chat on this computer may have connected since this one started; that's enough on its own.
@@ -1805,7 +1820,7 @@ async function refreshOnce($: EngineInterface, why: string) {
     if (!place) await setHome($, t)
     const before = await read($, teamAtom)
     if (before && (await read($, statusAtom)) === 'connected' && before.org_slug === t.org_slug && before.project?.slug === t.project?.slug) {
-      const name = t.project?.name ?? 'Everywhere'
+      const name = t.project?.name ?? 'Global agents'
       const joined = t.agents.filter(a => !before.agents.some(b => b.id === a.id) && !builtHere.has(a.title)).map(a => a.title)
       const left = before.agents.filter(b => !t.agents.some(a => a.id === b.id)).map(b => b.title)
       if (joined.length || left.length) {
@@ -1832,7 +1847,7 @@ async function refreshOnce($: EngineInterface, why: string) {
     signInNeeded = false
     void flushFeedback($)
     buildWaiting($, t)
-    note(`team ${t.project?.name ?? 'Everywhere'}: ${t.agents.length} agents, ${t.handoffs?.length ?? 0} hand-off rules (${why})`)
+    note(`team ${t.project?.name ?? 'Global agents'}: ${t.agents.length} agents, ${t.handoffs?.length ?? 0} hand-off rules (${why})${updateReady(t) ? `; Brigaide ${t.plugin_version} is out, this copy is ${VERSION}` : ''}`)
     cache[place ? placeCacheKey(place) : root] = { team: t, at: Date.now() }
     await storeSet($, foldersKey(), trim(cache, 100))
     await refreshSkill($)
@@ -2097,6 +2112,7 @@ export const register: Register = on => {
     begun = false
     quickOrder.length = 0
     dismissedAt.clear()
+    updateShown = 'offer'
     prefix = null
     folderInfo.clear()
     try {
@@ -2592,7 +2608,7 @@ ${body}${skillsSection(s.markdown) ? `\n\n${skillsSection(s.markdown)}` : ''}${r
         : t.projects.length
           ? `This folder has no Brigaide of its own yet; link it to one with /brigaide link <${t.projects.map(p => p.slug).join(' | ')}>.`
           : 'Showing your Global agents.'
-      return { text: `${where} Talking to ${current?.title ?? mainAgent?.title ?? 'Claude (no agent)'}.\n\n${list || '(no agents yet)'}\n\nSwitch with /brigaide <name>, or /brigaide off to talk to ${mainAgent?.title ?? 'plain Claude'}. /brigaide default starts new chats here with the current agent.${t.projects.length ? ' /brigaide use <brigaide> brings another Brigaide’s agents into this chat, and /brigaide back returns.' : ''} Manage your Brigaide at ${t.manage_url}` }
+      return { text: `${where} Talking to ${current?.title ?? mainAgent?.title ?? 'Claude (no agent)'}.\n\n${list || '(no agents yet)'}\n\nSwitch with /brigaide <name>, or /brigaide off to talk to ${mainAgent?.title ?? 'plain Claude'}. /brigaide default starts new chats here with the current agent.${t.projects.length ? ' /brigaide use <brigaide> brings another Brigaide’s agents into this chat, and /brigaide back returns.' : ''} Manage your Brigaide at ${t.manage_url}${updateReady(t) ? `\n\nA newer Brigaide is ready. On ${PLUGINS_PAGE}: ${UPDATE_STEPS}` : ''}` }
     }
     if (verb === 'default') {
       if (tail.toLowerCase() === 'clear' || tail.toLowerCase() === 'off') {
@@ -2851,7 +2867,7 @@ ${body}${skillsSection(s.markdown) ? `\n\n${skillsSection(s.markdown)}` : ''}${r
       if (t.agents.length === 0 && !usingNow) {
         if (!t.project) {
           if (!linkOffer) {
-            note('drew nothing: no Everywhere agents and this folder isn’t linked')
+            note('drew nothing: no Global agents and this folder isn’t linked')
             return next(e)
           }
           note('drew: offer to link this folder')
@@ -2915,7 +2931,7 @@ ${body}${skillsSection(s.markdown) ? `\n\n${skillsSection(s.markdown)}` : ''}${r
       const globalsHidden = !!t.project && t.project.shows_everywhere === false
       const brigaides = [...t.projects.map(p => ({ slug: p.slug, name: p.name as string | null, organization: orgOf(t, p) })), ...(globalsHidden ? [{ slug: EVERYWHERE, name: null, organization: undefined as string | undefined }] : [])].filter(b => b.slug !== shownSlug && b.slug !== home?.slug)
       const backLabel = using ? `Back to ${home ? brigaideName(home.slug, home.name) : 'this folder’s Brigaide'}` : null
-      note(`drew: ${using ? `[this chat: ${using}] ` : ''}${t.project?.name ?? 'Everywhere'} · ${current?.title ?? (mainAgent ? `${mainAgent.title} (folder agent)` : 'Claude')} · ${t.agents.length} agents${heardText ? ` · ${heardText}` : ''}${st === 'connected' ? '' : ` (${st}, cached)`}`)
+      note(`drew: ${using ? `[this chat: ${using}] ` : ''}${t.project?.name ?? 'Global agents'} · ${current?.title ?? (mainAgent ? `${mainAgent.title} (folder agent)` : 'Claude')} · ${t.agents.length} agents${heardText ? ` · ${heardText}` : ''}${st === 'connected' ? '' : ` (${st}, cached)`}`)
 
       // One control for the agent: its name is the menu. The agents first, then one plain divider,
       // then what you can do: Dashboard, new chats with this agent, build an agent you asked for, add
@@ -3137,6 +3153,36 @@ ${body}${skillsSection(s.markdown) ? `\n\n${skillsSection(s.markdown)}` : ''}${r
             const ask = many ? 'Ask them' : 'Ask'
             // Ask answers the notice and is the one real button; Dismiss declines it, so it's quiet.
             return { len: cost([text, 'Dismiss'], [ask]), kids: [say('missed-text', text), act('bring-in', ask, () => bringInMissed($)), quiet('missed-dismiss', 'Dismiss', () => void dismissMissed($))] }
+          },
+        })
+      }
+      // Last, and waiting: it shows only when nothing else needs the slot, never on a line of its own.
+      if (updateReady(t) && updateShown !== 'done') {
+        const steps = updateShown === 'steps'
+        const later = () => {
+          updateShown = 'done'
+          note(`update: put away (${steps ? 'OK' : 'Later'})`)
+          redraw($)
+        }
+        notices.push({
+          key: 'update',
+          waits: true,
+          draw: tier => {
+            if (steps) return { len: cost([UPDATE_STEPS, 'OK'], []), kids: [say('update-steps', UPDATE_STEPS), quiet('update-ok', 'OK', later)] }
+            const text = tier === 'narrow' ? 'Update ready' : 'A newer Brigaide is ready'
+            return {
+              len: cost([text, 'Later'], ['Update']),
+              kids: [
+                say('update-text', text),
+                act('update', 'Update', () => {
+                  updateShown = 'steps'
+                  note(`update: opened Claude's Plugins page (${VERSION} → ${t.plugin_version})`)
+                  void openPage($, PLUGINS_PAGE, 'Claude’s Plugins page')
+                  redraw($)
+                }),
+                quiet('update-later', 'Later', later),
+              ],
+            }
           },
         })
       }

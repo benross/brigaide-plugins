@@ -62,6 +62,8 @@ export type Team = {
   /** Agents this person asked for on the website, waiting to be built in Claude. */
   agent_requests?: { id: string; title: string; project: string | null; scope: 'team' | 'personal'; /** waiting: build it now; building: a bar is on it; failed: wait for a person. */ build?: 'waiting' | 'building' | 'failed' }[]
   manage_url: string
+  /** The newest published plugin ("x.y.z"); older servers leave it out. The bar offers the update when its own copy is older. */
+  plugin_version?: string
 }
 
 /** An agent's merged skill, as agent_get (format json) returns it. */
