@@ -1,6 +1,6 @@
 {
   "name": "brigaide-desktop",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "In Codex, each new thread starts as the agent set for its folder. Needs Brigaide added first.",
   "author": {
     "name": "Brigaide",
@@ -23,6 +23,8 @@
     "category": "Productivity",
     "capabilities": [],
     "websiteURL": "https://brigaide.ai/",
+    "privacyPolicyURL": "https://app.brigaide.ai/privacy",
+    "termsOfServiceURL": "https://app.brigaide.ai/terms",
     "defaultPrompt": [
       "Who are you working as?",
       "Work as my Designer",

@@ -1,10 +1,13 @@
 {
   "name": "brigaide",
   "displayName": "Brigaide",
-  "version": "0.16.5",
+  "version": "0.16.6",
   "description": "Your Brigaide agents in Claude Code: see who you’re working with, switch, and teach them as you go.",
   "author": {
     "name": "Ben"
   },
+  "homepage": "https://app.brigaide.ai/",
+  "privacyPolicyUrl": "https://app.brigaide.ai/privacy",
+  "termsOfServiceUrl": "https://app.brigaide.ai/terms",
   "types": "./types/index.d.ts"
 }
