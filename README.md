@@ -18,7 +18,9 @@ In the Claude app on your computer:
    `benross/brigaide-plugins`, choose **Use "benross/brigaide-plugins"** and press **Sync**.
 3. Press **Brigaide**, then **Add**, then **Continue**.
 4. Under **Finish setting up Brigaide**, press **Add…**, **Continue** and **Add**, then **Connect**, and
-   **Connect** again on the Brigaide page. Your agents are now in your Claude chats too.
+   **Connect** again on the Brigaide page. Your agents are now in your Claude chats too. If Claude says a
+   connector with this URL already exists, close that box and press **Connect** next to Brigaide on the
+   plugin's page.
 5. Open the **Code** tab and start a new session. The Brigaide bar above the message box names your
    agent; if it shows **Connect**, press it and sign in. No bar? Start one more new session: one opened
    in the first minute after adding Brigaide can start without it.
