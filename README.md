@@ -5,7 +5,7 @@ a Marketing lead. They work inside the AI tools you already use and learn from y
 
 This repository holds the add-ons that put Brigaide inside Claude Code, ChatGPT and Codex.
 
-## Brigaide for Claude Code
+## Brigaide for Claude (chats and Claude Code)
 
 A bar above the prompt shows which agent you're talking to and switches to another in one press.
 
@@ -19,8 +19,8 @@ In the Claude app on your computer:
 3. Press **Brigaide**, then **Add**, then **Continue**.
 4. Under **Finish setting up Brigaide**, press **Add…**, **Continue** and **Add**, then **Connect**, and
    **Connect** again on the Brigaide page. Your agents are now in your Claude chats too. If Claude says a
-   connector with this URL already exists, close that box and press **Connect** next to Brigaide on the
-   plugin's page.
+   connector with this URL already exists, close that box, open <https://claude.ai/plugins> in your
+   browser, choose **Brigaide** and press **Connect** next to its connector.
 5. Open the **Code** tab and start a new session. The Brigaide bar above the message box names your
    agent; if it shows **Connect**, press it and sign in. No bar? Start one more new session: one opened
    in the first minute after adding Brigaide can start without it.
@@ -42,7 +42,7 @@ Type these into Claude Code's prompt, one at a time. After the second, choose **
 
 </details>
 
-For Claude on the web or in the desktop app's chats, follow <https://app.brigaide.ai/install/claude>.
+Step by step, with pictures: <https://app.brigaide.ai/install/claude>.
 
 ## Brigaide for Codex
 
