@@ -56,6 +56,8 @@ export type Team = {
   /** Catalog roles this team doesn't have, and where an admin adds them. */
   missing?: { agent: string; title: string }[]
   dashboard_url?: string
+  /** An owner's first month: "Choose a plan (N days of Team left)", right after the Dashboard. */
+  choose_plan?: { url: string; label: string } | null
   add_url?: string
   /** Where to create a new Brigaide; only for people who may. */
   create_url?: string

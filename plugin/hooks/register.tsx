@@ -53,6 +53,7 @@ const DIVIDER = '__divider'
 // Every list of agents to pick from is A–Z by name (docs/integrations.md), the same as the server's byName.
 const byName = <T extends { title: string }>(list: readonly T[]): T[] => [...list].sort((a, b) => a.title.localeCompare(b.title, 'en', { sensitivity: 'base' }))
 const DASHBOARD = '__dashboard'
+const CHOOSE_PLAN = '__plan'
 const ADD_AGENT = '__add'
 const HELP = '__help'
 const FEEDBACK = '__feedback'
@@ -262,7 +263,7 @@ async function chooseServer($: EngineInterface) {
   SERVER = next
   serverIsLocal = onLocal()
 }
-const VERSION = '0.16.7'
+const VERSION = '0.16.8'
 
 // Claude's account copy of the plugin (Settings → Plugins → Add marketplace) doesn't update by itself
 // unless the person turned on "Sync automatically". When the server says a newer one is published, the
@@ -2952,6 +2953,7 @@ ${body}${skillsSection(s.markdown) ? `\n\n${skillsSection(s.markdown)}` : ''}${r
         // One plain line between the agents and the actions. Picking it does nothing.
         { value: DIVIDER, label: '──────────' },
         { value: DASHBOARD, label: 'Brigaide Dashboard' },
+        ...(t.choose_plan ? [{ value: CHOOSE_PLAN, label: t.choose_plan.label }] : []),
         ...(backLabel ? [{ value: BACK, label: backLabel }] : []),
         ...(using && t.project && home && !home.name && t.projects.some(p => p.slug === t.project!.slug) ? [{ value: KEEP, label: `Keep ${t.project.name}’s Brigaide for this folder` }] : []),
         ...(unlinkedHome && t.projects.length ? [{ value: LINK_PICK, label: 'Choose a Brigaide for this folder…' }] : []),
@@ -3006,6 +3008,7 @@ ${body}${skillsSection(s.markdown) ? `\n\n${skillsSection(s.markdown)}` : ''}${r
           )
         }
         if (value === DASHBOARD) return void openPage($, t.dashboard_url ?? t.manage_url.replace(/\/p\/[^/]+$/, ''), 'Dashboard')
+        if (value === CHOOSE_PLAN && t.choose_plan) return void openPage($, t.choose_plan.url, 'Plan page')
         if (value === ADD_AGENT) return void openPage($, t.add_url ?? t.manage_url, 'Add agents')
         if (value === HELP) return void openPage($, `${SERVER}/help`, 'Help')
         if (value === FEEDBACK) return openFeedback()
