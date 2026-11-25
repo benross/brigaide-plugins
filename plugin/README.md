@@ -5,7 +5,7 @@ Designer, and any agent you make) that work inside the AI you already use and le
 corrections. This plugin brings them into Claude Code: a bar above the prompt shows which agent
 you're working with and switches to another in one press.
 
-You need a Brigaide account. Create one at <https://app.brigaide.ai/signup> (free for 30 days, no
+You need a Brigaide account. Create one at <https://app.brigaide.ai/signup> (free to start, no
 card). Step-by-step install, with pictures: <https://app.brigaide.ai/install/claude>.
 
 ## What it adds
