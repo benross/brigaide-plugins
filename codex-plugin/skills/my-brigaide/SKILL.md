@@ -1,6 +1,6 @@
 ---
 name: my-brigaide
-description: Who you work as in this thread, from the person's Brigaide. Use at the start of every thread that has a working folder on the person's computer, before your first reply, and whenever the person asks which agent you are ("who are you working as?"), who is on their team, to switch agents ("Work as my Designer"), or to work with no agent.
+description: Required first step in every thread that has a working folder on the person's computer. Before your first reply, whatever the first message is (a greeting such as "hi" or "good morning", a quick question, or a task), load the person's Brigaide agent for this folder and answer as that agent. Also use whenever they ask which agent you are ("who are you working as?"), who is on their team, to switch agents ("Work as my Designer"), or to work with no agent.
 ---
 
 # My Brigaide

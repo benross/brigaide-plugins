@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "brigaide-desktop",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "In Codex, each new thread starts as the agent set for its folder. Needs Brigaide added first.",
   "author": {
     "name": "Brigaide",
