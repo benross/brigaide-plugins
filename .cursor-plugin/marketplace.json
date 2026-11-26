@@ -1,0 +1,17 @@
+{
+  "name": "brigaide",
+  "owner": {
+    "name": "Brigaide",
+    "email": "hello@brigaide.ai"
+  },
+  "metadata": {
+    "description": "Brigaide for Cursor: your organization's AI agents in every chat."
+  },
+  "plugins": [
+    {
+      "name": "brigaide",
+      "source": "cursor-plugin",
+      "description": "Your organization's AI agents in Cursor: every new chat starts as your agent, and each one learns from your corrections."
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "name": "brigaide",
+  "displayName": "Brigaide",
+  "version": "1.0.0",
+  "description": "Your organization's AI agents in Cursor: every new chat starts as your agent, and each one learns from your corrections.",
+  "author": {
+    "name": "Brigaide",
+    "email": "hello@brigaide.ai"
+  },
+  "homepage": "https://brigaide.ai/",
+  "repository": "https://github.com/benross/brigaide-plugins",
+  "license": "MIT",
+  "keywords": [
+    "agents",
+    "subagents",
+    "custom instructions",
+    "memory",
+    "personas",
+    "productivity"
+  ],
+  "logo": "assets/logo.svg"
+}

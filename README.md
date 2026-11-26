@@ -3,7 +3,7 @@
 [Brigaide](https://brigaide.ai/) gives your team agents with an owner: a Designer, a Code reviewer,
 a Marketing lead. They work inside the AI tools you already use and learn from your corrections.
 
-This repository holds the add-ons that put Brigaide inside Claude Code, ChatGPT and Codex.
+This repository holds the add-ons that put Brigaide inside Claude Code, ChatGPT, Codex and Cursor.
 
 ## Brigaide for Claude Code
 
@@ -63,6 +63,18 @@ codex plugin marketplace add benross/brigaide-plugins
 ```bash
 codex plugin add brigaide-desktop@brigaide
 ```
+
+## Brigaide for Cursor
+
+Every new chat in Cursor starts as your agent, with Brigaide's card to switch agents in one press.
+
+1. In Cursor, press **Customize** in the sidebar, then **Add**, then **From GitHub Repository**, and
+   paste `https://github.com/benross/brigaide-plugins`. Install **Brigaide**.
+2. Press **Sign In** next to Brigaide under MCPs. In the browser, sign in to Brigaide or create a free
+   account, then press **Connect**.
+3. Press **New Chat** and say hi.
+
+Step by step, with pictures: <https://app.brigaide.ai/install/cursor>.
 
 ## Help
 
