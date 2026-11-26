@@ -67,14 +67,8 @@ codex plugin add brigaide-desktop@brigaide
 ## Brigaide for Cursor
 
 Every new chat in Cursor starts as your agent, with Brigaide's card to switch agents in one press.
-
-1. In Cursor, press **Customize** in the sidebar, then **Add**, then **From GitHub Repository**, and
-   paste `https://github.com/brigaide-ai/brigaide-plugins`. Install **Brigaide**.
-2. Press **Sign In** next to Brigaide under MCPs. In the browser, sign in to Brigaide or create a free
-   account, then press **Connect**.
-3. Press **New Chat** and say hi.
-
-Step by step, with pictures: <https://app.brigaide.ai/install/cursor>.
+Follow <https://app.brigaide.ai/install/cursor>: one **Add to Cursor** button, one sign-in, and one
+line so every chat starts as your agent. The plugin in `cursor-plugin/` is for Cursor's Marketplace.
 
 ## Help
 
