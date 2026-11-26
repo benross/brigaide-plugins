@@ -8,7 +8,7 @@
     "email": "hello@brigaide.ai"
   },
   "homepage": "https://brigaide.ai/",
-  "repository": "https://github.com/benross/brigaide-plugins",
+  "repository": "https://github.com/brigaide-ai/brigaide-plugins",
   "license": "MIT",
   "keywords": [
     "agents",

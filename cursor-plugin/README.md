@@ -16,7 +16,7 @@ with Brigaide (Claude, ChatGPT, Gemini).
 ## Install
 
 1. In Cursor, press **Customize** in the sidebar, then **Add**, then **From GitHub Repository**, and
-   paste `https://github.com/benross/brigaide-plugins`. Install **Brigaide**.
+   paste `https://github.com/brigaide-ai/brigaide-plugins`. Install **Brigaide**.
 2. Press **Sign In** next to Brigaide under MCPs. In the browser, sign in to Brigaide or create a
    free account, then press **Connect**.
 3. Press **New Chat** and say hi.

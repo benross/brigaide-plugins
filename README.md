@@ -18,7 +18,7 @@ Then, for the bar in the Claude app's Code tab:
 
 1. Open **Settings**, then **Plugins** (on the web: <https://claude.ai/plugins>).
 2. Press **Add**, then **Add marketplace**, then **Add from a repository**. Type
-   `benross/brigaide-plugins`, choose **Use "benross/brigaide-plugins"** and press **Sync**.
+   `brigaide-ai/brigaide-plugins`, choose **Use "brigaide-ai/brigaide-plugins"** and press **Sync**.
 3. Press **Brigaide**, then **Add**, then **Continue**.
 4. Open the **Code** tab and start a new session. If the bar shows **Connect**, press it.
 
@@ -28,7 +28,7 @@ Then, for the bar in the Claude app's Code tab:
 Type these into Claude Code's prompt, one at a time. After the second, choose **Install for you**.
 
 ```
-/plugin marketplace add benross/brigaide-plugins
+/plugin marketplace add brigaide-ai/brigaide-plugins
 ```
 
 ```
@@ -57,7 +57,7 @@ whole workspace. [Tell us](https://app.brigaide.ai/feedback) and we'll set it up
 If you'd rather use Codex's command line:
 
 ```bash
-codex plugin marketplace add benross/brigaide-plugins
+codex plugin marketplace add brigaide-ai/brigaide-plugins
 ```
 
 ```bash
@@ -69,7 +69,7 @@ codex plugin add brigaide-desktop@brigaide
 Every new chat in Cursor starts as your agent, with Brigaide's card to switch agents in one press.
 
 1. In Cursor, press **Customize** in the sidebar, then **Add**, then **From GitHub Repository**, and
-   paste `https://github.com/benross/brigaide-plugins`. Install **Brigaide**.
+   paste `https://github.com/brigaide-ai/brigaide-plugins`. Install **Brigaide**.
 2. Press **Sign In** next to Brigaide under MCPs. In the browser, sign in to Brigaide or create a free
    account, then press **Connect**.
 3. Press **New Chat** and say hi.
