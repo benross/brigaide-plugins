@@ -1,8 +1,8 @@
 {
   "name": "brigaide",
   "displayName": "Brigaide",
-  "version": "1.0.0",
-  "description": "Your organization's AI agents in Cursor: every new chat starts as your agent, and each one learns from your corrections.",
+  "version": "1.0.1",
+  "description": "AI employees for Cursor: an AI team of personas, each with its own custom instructions, that remember what you teach them. Every new chat starts as your agent. In a repo linked to one of your Brigaides, it's that Brigaide's agent. A card in each chat shows who you're talking to and switches agents in one press, or to No agent. Correct an agent once and it records a lesson, shared with everyone who uses that agent, in Cursor, Claude, ChatGPT and Gemini. No Cursor rules to copy between repos, no team rules to keep in sync. It works like an agent team: agents ask each other to weigh in, with no subagents to wire up, and your Code reviewer checks code before you commit. Start with a Code reviewer, Designer, Copywriter, Product manager, Marketing lead and CEO, or make any agent in a sentence. Start free.",
   "author": {
     "name": "Brigaide",
     "email": "hello@brigaide.ai"
@@ -11,12 +11,26 @@
   "repository": "https://github.com/brigaide-ai/brigaide-plugins",
   "license": "MIT",
   "keywords": [
-    "agents",
-    "subagents",
     "custom instructions",
-    "memory",
+    "AI team",
+    "agent team",
+    "AI employees",
+    "team rules",
+    "shared rules",
+    "cursor rules",
+    "code reviewer",
+    "remember",
+    "lessons",
+    "subagents",
     "personas",
-    "productivity"
+    "multi-agent",
+    "code review",
+    "AGENTS.md",
+    "agents",
+    "memory",
+    "AI agents",
+    "copywriter",
+    "designer"
   ],
   "logo": "assets/logo.svg"
 }

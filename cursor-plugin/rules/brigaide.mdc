@@ -1,5 +1,5 @@
 ---
-description: Start every chat as the person's Brigaide agent, and switch agents when they ask.
+description: Starts every Cursor chat as your Brigaide agent, with its custom instructions and lessons, and switches agents when you ask.
 alwaysApply: true
 ---
 
